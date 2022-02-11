@@ -17,9 +17,9 @@ namespace DemoGennerateSqlParameters.EF
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer(@"Server=DESKTOP-0VUF4BP\SQLEXPRESS;Database=kooboo_demo_01;User Id=sa;Password=123;");
+            optionsBuilder.UseSqlServer(@"Server=192.168.137.201;Database=VIETNHAT_AM;uid=dev;password=esvn2020@;MultipleActiveResultSets=true");
         }
-        public DbSet<CommandMsg> CommandMsgs { get; set; }
+        public virtual DbSet<CommandMsg> CommandMsgs { get; set; }
     }
 
 

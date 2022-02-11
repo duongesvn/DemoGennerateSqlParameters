@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
+using EsHelper;
 
 namespace DemoGennerateSqlParameters
 {
@@ -23,17 +24,13 @@ namespace DemoGennerateSqlParameters
             };
             var lsData = new List<TempClass> { tempData };
 
-            var parameters = SqlParameterGen.GennerateH.genSqlParameter(tempData);
-            var tbl01 = SqlParameterGen.GennerateH.genSqlParameterDataTable(lsData,"tempData","dbo.ABC");
+            var parameters = SqlParameterHelper.genSqlParameter(tempData);
+            var tbl01 = SqlParameterHelper.genSqlParameterDataTable(lsData,"tempData","dbo.ABC");
             parameters.Add(tbl01);
 
-            string sql = @"SP_Demo 
-	                        @RowGuid
-	                        ,@Name
-	                        ,@CreatedDate
-	                        ,@Cost
-	                        ,@IsActive
-	                        ,@tempData";
+            string sql = @"SP_Demo";
+            sql += SqlParameterHelper.genSPQueryString(parameters);
+
             //using (var db = new DemoContext())
             //{
             //    var rawSql = new RawSqlString(sql);
@@ -41,10 +38,26 @@ namespace DemoGennerateSqlParameters
             //    var rs = await db.CommandMsgs.FromSqlRaw(sql, parameters.ToArray()).FirstOrDefaultAsync();
             //    var a = 1;
             //}
-            
+
+
+            var obj01 = new TempClass
+            {
+                RowGuid = Guid.NewGuid(),
+                Name="ABC"
+            };
+
+            var rs2 = ObjectMapHelper.Map<object, TempClass02>(obj01);
+
+
             Console.WriteLine("Hello World!");
         }
     }
+
+    public class TempClass02 : TempClass
+    {
+        public string FullName { get; set; }
+    }
+    
 
     public class TempClass
     {

@@ -6,10 +6,10 @@ using System.Text;
 using System.Linq;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace DemoGennerateSqlParameters.SqlParameterGen
+namespace EsHelper
 {
     
-    public class GennerateH
+    public class SqlParameterHelper
     {
         public static List<SqlParameter> genSqlParameter<T>(T obj) where T:new()
         {
@@ -26,7 +26,7 @@ namespace DemoGennerateSqlParameters.SqlParameterGen
                     var _pr = new SqlParameter();
                     _pr.ParameterName = "@" + prop.Name;
                     var value = prop.GetValue(obj);
-                    _pr.Value = value == null ? "" : value;
+                    _pr.Value = value == null ? DBNull.Value : value;
 
                     parameters.Add(_pr);
                 }
@@ -51,7 +51,7 @@ namespace DemoGennerateSqlParameters.SqlParameterGen
         public static SqlParameter genSqlParameterDataTable<T>(IEnumerable<T> data, string parameterName, string typeName) where T : new()
         {
             var _pr = new SqlParameter();
-            _pr.ParameterName = "@" + parameterName;
+            _pr.ParameterName = parameterName;
             _pr.TypeName = typeName;
 
             var props = data.First().GetType().GetProperties().Where(prop => {
@@ -86,6 +86,40 @@ namespace DemoGennerateSqlParameters.SqlParameterGen
 
             _pr.Value = dataTable;
             return _pr;
+        }
+
+        public static string genSPQueryString(IEnumerable<SqlParameter> pr)
+        {
+            var lsSql = pr.Select(c => {
+                if (c.Direction == ParameterDirection.Output) return c.ParameterName + " OUT";
+                return c.ParameterName;
+            });
+            return string.Join(",", lsSql);
+        }
+    }
+
+    public class ObjectMapHelper
+    {
+        public static TO Map<FO,TO>(FO from) where TO: new()
+        {
+            var typeFO = from.GetType();
+            TO distTO = new TO();
+            var typeTO = distTO.GetType();
+
+            var TO_Props = typeTO.GetProperties();
+            var FO_Props = typeFO.GetProperties();
+
+            foreach(var prop in TO_Props)
+            {
+                if(FO_Props.Any(c=>c.Name == prop.Name))
+                {
+                    var FO_Value = typeFO.GetProperty(prop.Name).GetValue(from);
+                    typeTO.GetProperty(prop.Name).SetValue(distTO, FO_Value);
+                }
+                
+            }
+
+            return distTO;
         }
     }
 }
